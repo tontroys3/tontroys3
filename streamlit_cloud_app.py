@@ -19,7 +19,11 @@ def init_database():
     """Initialize SQLite database with required tables"""
     # Use in-memory database for cloud deployment
     if 'db_connection' not in st.session_state:
-        st.session_state.db_connection = sqlite3.connect(':memory:', check_same_thread=False)
+        try:
+            st.session_state.db_connection = sqlite3.connect(':memory:', check_same_thread=False)
+        except Exception as e:
+            st.error(f"Database connection error: {e}")
+            return None
     
     conn = st.session_state.db_connection
     cursor = conn.cursor()
@@ -73,7 +77,9 @@ def init_database():
     return conn
 
 # Initialize database
-init_database()
+if init_database() is None:
+    st.error("Failed to initialize database")
+    st.stop()
 
 # Authentication functions
 def hash_password(password):
